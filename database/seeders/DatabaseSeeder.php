@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use Database\Seeders\MarqueSeeder;
+use Database\Seeders\ModeleSeeder;
 use Database\Seeders\ModePaiementSeeder;
 use Database\Seeders\StatutPaiementSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -20,6 +22,8 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         $this->call([
+            MarqueSeeder::class,
+            ModeleSeeder::class,
             StatutPaiementSeeder::class,
             ModePaiementSeeder::class,
         ]);
