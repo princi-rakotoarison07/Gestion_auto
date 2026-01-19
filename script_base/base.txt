@@ -1,36 +1,130 @@
-CLIENT (id_client, nom, prénom, adresse, téléphone, email, type_client)
-  • PK: id_client
-  • type_client: 'particulier' | 'professionnel' | 'fournisseur'
+-- ============================================
+-- TABLES DE BASE (inchangées)
+-- ============================================
 
-VEHICULE (id_vehicule, immatriculation, marque, modele, annee, couleur, 
-           kilometrage, prix_achat, prix_vente, etat, type_carburant, 
-           date_acquisition, id_fournisseur, id_client_vendeur, id_employe_responsable)
-  • PK: id_vehicule
-  • FK: id_fournisseur → FOURNISSEUR.id_fournisseur
-  • FK: id_client_vendeur → CLIENT.id_client
-  • FK: id_employe_responsable → EMPLOYE.id_employe
-  • etat: 'neuf' | 'occasion' | 'vendue' | 'en_reparation'
+-- 1. TABLE CLIENT
+CLIENT (
+  id_client INT PRIMARY KEY AUTO_INCREMENT,
+  nom VARCHAR(50) NOT NULL,
+  prenom VARCHAR(50) NOT NULL,
+  telephone VARCHAR(20) NOT NULL,
+  email VARCHAR(100)
+)
 
-EMPLOYE (id_employe, nom, prénom, fonction, date_embauche, salaire, email, téléphone)
-  • PK: id_employe
-  • fonction: 'commercial' | 'gestionnaire' | 'administratif' | 'technicien'
+-- 2. TABLE VEHICULE
+VEHICULE (
+  id_vehicule INT PRIMARY KEY AUTO_INCREMENT,
+  immatriculation VARCHAR(20) UNIQUE,
+  marque VARCHAR(50) NOT NULL,
+  modele VARCHAR(50) NOT NULL,
+  url_img VARCHAR(50) NOT NULL, 
+  annee INT NOT NULL CHECK (annee >= 1900 AND annee <= YEAR(CURRENT_DATE) + 1),
+  prix_achat DECIMAL(10,2) NOT NULL CHECK (prix_achat > 0),
+  prix_vente DECIMAL(10,2) NOT NULL CHECK (prix_vente > 0)
+)
 
-VENTE (id_vente, date_vente, montant_total, mode_paiement, 
-       id_vehicule, id_client_acheteur, id_commercial)
-  • PK: id_vente
-  • FK: id_vehicule → VEHICULE.id_vehicule
-  • FK: id_client_acheteur → CLIENT.id_client
-  • FK: id_commercial → EMPLOYE.id_employe
-  • mode_paiement: 'comptant' | 'credit' | 'leasing'
+-- 3. TABLE EMPLOYE
+EMPLOYE (
+  id_employe INT PRIMARY KEY AUTO_INCREMENT,
+  nom VARCHAR(50) NOT NULL,
+  prenom VARCHAR(50) NOT NULL,
+  telephone VARCHAR(20)
+)
 
-FOURNISSEUR (id_fournisseur, nom, adresse, téléphone, email, type_fournisseur)
-  • PK: id_fournisseur
-  • type_fournisseur: 'constructeur' | 'importateur' | 'particulier'
+-- ============================================
+-- TABLES DE RÉFÉRENCE
+-- ============================================
 
-OPTION (id_option, nom, description, prix)
-  • PK: id_option
+-- 4. TABLE MODE_PAIEMENT
+MODE_PAIEMENT (
+  id_mode_paiement INT PRIMARY KEY AUTO_INCREMENT,
+  libelle VARCHAR(50) NOT NULL UNIQUE,  -- espece, carte, cheque, Mvola, Orange
+  actif BOOLEAN DEFAULT TRUE             -- permet de désactiver sans supprimer
+)
 
-VENTE_OPTION (id_vente, id_option, quantite, prix_unitaire)
-  • PK: (id_vente, id_option)
-  • FK: id_vente → VENTE.id_vente
-  • FK: id_option → OPTION.id_option
+-- 5. TABLE STATUT_PAIEMENT (NOUVELLE)
+STATUT_PAIEMENT (
+  id_statut_paiement INT PRIMARY KEY AUTO_INCREMENT,
+  libelle VARCHAR(50) NOT NULL UNIQUE,  -- en_attente, partiel, complet, retard
+  actif BOOLEAN DEFAULT TRUE
+)
+
+-- ============================================
+-- TABLES VENTE ET PAIEMENT MODIFIÉES
+-- ============================================
+
+-- 6. TABLE VENTE (avec référence au statut)
+VENTE (
+  id_vente INT PRIMARY KEY AUTO_INCREMENT,
+  date_vente DATE NOT NULL DEFAULT CURRENT_DATE,
+  id_vehicule INT NOT NULL,
+  id_client INT NOT NULL,
+  id_employe INT NOT NULL,
+  montant_total DECIMAL(10,2) NOT NULL CHECK (montant_total > 0),
+  
+  -- NOUVEAU : Référence à la table STATUT_PAIEMENT
+  id_statut_paiement INT NOT NULL DEFAULT 1,  -- 1 = 'en_attente' par défaut
+  date_paiement_complet DATE,  -- Quand le paiement est terminé
+  
+  -- Contrainte unique : un véhicule ne peut être vendu qu'une fois
+  UNIQUE (id_vehicule),
+  
+  -- Clés étrangères
+  FOREIGN KEY (id_vehicule) REFERENCES VEHICULE(id_vehicule),
+  FOREIGN KEY (id_client) REFERENCES CLIENT(id_client),
+  FOREIGN KEY (id_employe) REFERENCES EMPLOYE(id_employe),
+  FOREIGN KEY (id_statut_paiement) REFERENCES STATUT_PAIEMENT(id_statut_paiement)
+)
+
+-- 7. TABLE PAIEMENT
+PAIEMENT (
+  id_paiement INT PRIMARY KEY AUTO_INCREMENT,
+  id_vente INT NOT NULL,
+  id_mode_paiement INT NOT NULL,
+  date_paiement DATE NOT NULL DEFAULT CURRENT_DATE,
+  montant DECIMAL(10,2) NOT NULL CHECK (montant > 0),
+  reference VARCHAR(100),  -- numéro de chèque, transaction, etc.
+  
+  FOREIGN KEY (id_vente) REFERENCES VENTE(id_vente),
+  FOREIGN KEY (id_mode_paiement) REFERENCES MODE_PAIEMENT(id_mode_paiement)
+)
+
+-- 8. TABLE CAISSE
+CAISSE (
+  id_caisse INT PRIMARY KEY AUTO_INCREMENT,
+  solde DECIMAL(10,2) DEFAULT 0,
+  date_derniere_operation DATETIME DEFAULT CURRENT_TIMESTAMP
+)
+
+-- 9. TABLE OPERATION_CAISSE
+OPERATION_CAISSE (
+  id_operation INT PRIMARY KEY AUTO_INCREMENT,
+  id_caisse INT NOT NULL,
+  type_operation VARCHAR(10) NOT NULL CHECK (type_operation IN ('entree', 'sortie')),
+  montant DECIMAL(10,2) NOT NULL CHECK (montant > 0),
+  date_operation DATETIME DEFAULT CURRENT_TIMESTAMP,
+  description VARCHAR(255),
+  id_paiement INT,
+  
+  FOREIGN KEY (id_caisse) REFERENCES CAISSE(id_caisse),
+  FOREIGN KEY (id_paiement) REFERENCES PAIEMENT(id_paiement)
+)
+
+-- ============================================
+-- DONNÉES INITIALES
+-- ============================================
+
+-- Insertion des statuts de paiement par défaut
+INSERT INTO STATUT_PAIEMENT (id_statut_paiement, libelle, actif) VALUES
+(1, 'en_attente', TRUE),
+(2, 'partiel', TRUE),
+(3, 'complet', TRUE),
+(4, 'retard', TRUE);
+
+-- Insertion des modes de paiement par défaut
+INSERT INTO MODE_PAIEMENT (libelle, actif) VALUES
+('espece', TRUE),
+('carte', TRUE),
+('cheque', TRUE),
+('Mvola', TRUE),
+('Orange', TRUE);
