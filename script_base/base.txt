@@ -1,0 +1,36 @@
+CLIENT (id_client, nom, prénom, adresse, téléphone, email, type_client)
+  • PK: id_client
+  • type_client: 'particulier' | 'professionnel' | 'fournisseur'
+
+VEHICULE (id_vehicule, immatriculation, marque, modele, annee, couleur, 
+           kilometrage, prix_achat, prix_vente, etat, type_carburant, 
+           date_acquisition, id_fournisseur, id_client_vendeur, id_employe_responsable)
+  • PK: id_vehicule
+  • FK: id_fournisseur → FOURNISSEUR.id_fournisseur
+  • FK: id_client_vendeur → CLIENT.id_client
+  • FK: id_employe_responsable → EMPLOYE.id_employe
+  • etat: 'neuf' | 'occasion' | 'vendue' | 'en_reparation'
+
+EMPLOYE (id_employe, nom, prénom, fonction, date_embauche, salaire, email, téléphone)
+  • PK: id_employe
+  • fonction: 'commercial' | 'gestionnaire' | 'administratif' | 'technicien'
+
+VENTE (id_vente, date_vente, montant_total, mode_paiement, 
+       id_vehicule, id_client_acheteur, id_commercial)
+  • PK: id_vente
+  • FK: id_vehicule → VEHICULE.id_vehicule
+  • FK: id_client_acheteur → CLIENT.id_client
+  • FK: id_commercial → EMPLOYE.id_employe
+  • mode_paiement: 'comptant' | 'credit' | 'leasing'
+
+FOURNISSEUR (id_fournisseur, nom, adresse, téléphone, email, type_fournisseur)
+  • PK: id_fournisseur
+  • type_fournisseur: 'constructeur' | 'importateur' | 'particulier'
+
+OPTION (id_option, nom, description, prix)
+  • PK: id_option
+
+VENTE_OPTION (id_vente, id_option, quantite, prix_unitaire)
+  • PK: (id_vente, id_option)
+  • FK: id_vente → VENTE.id_vente
+  • FK: id_option → OPTION.id_option
