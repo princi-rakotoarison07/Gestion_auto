@@ -38,12 +38,16 @@
                 <th>Véhicule</th>
                 <th>Client</th>
                 <th>Montant Total</th>
-                <th>Statut Paiement</th>
+                <th>Reste à payer</th>
+                <th>Statut</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               @forelse ($ventes as $vente)
+                @php
+                    $v = \App\Models\Vente::find($vente->id_vente);
+                @endphp
                 <tr>
                   <td>{{ \Carbon\Carbon::parse($vente->date_vente)->format('d/m/Y') }}</td>
                   <td>
@@ -52,6 +56,7 @@
                   </td>
                   <td>{{ $vente->client_nom }} {{ $vente->client_prenom }}</td>
                   <td>{{ number_format($vente->montant_total, 2, ',', ' ') }} €</td>
+                  <td class="text-danger fw-bold">{{ number_format($v->reste_a_payer, 2, ',', ' ') }} €</td>
                   <td>
                     @php
                         $badgeClass = match($vente->id_statut_paiement) {

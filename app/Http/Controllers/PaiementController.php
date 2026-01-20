@@ -12,25 +12,14 @@ class PaiementController extends Controller
 {
     public function index()
     {
-        $paiements = DB::table('paiement')
-            ->join('vente', 'paiement.id_vente', '=', 'vente.id_vente')
-            ->join('client', 'vente.id_client', '=', 'client.id_client')
-            ->join('mode_paiement', 'paiement.id_mode_paiement', '=', 'mode_paiement.id_mode_paiement')
-            ->join('vehicule', 'vente.id_vehicule', '=', 'vehicule.id_vehicule')
-            ->join('modele', 'vehicule.id_modele', '=', 'modele.id_modele')
-            ->join('marque', 'modele.id_marque', '=', 'marque.id_marque')
-            ->select(
-                'paiement.*',
-                'client.nom as client_nom',
-                'client.prenom as client_prenom',
-                'mode_paiement.libelle as mode_libelle',
-                'marque.libelle as marque_nom',
-                'modele.libelle as modele_libelle'
-            )
-            ->orderByDesc('paiement.date_paiement')
+        // On récupère les paiements groupés par vente et par date
+        $paiementsGroupes = Paiement::with(['vente.client', 'vente.vehicule.modele.marque', 'modePaiement'])
+            ->select('id_vente', 'date_paiement', DB::raw('SUM(montant) as total_journalier'))
+            ->groupBy('id_vente', 'date_paiement')
+            ->orderByDesc('date_paiement')
             ->get();
 
-        return view('paiements.index', compact('paiements'));
+        return view('paiements.index', compact('paiementsGroupes'));
     }
 
     public function create()
