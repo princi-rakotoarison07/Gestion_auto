@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Vehicule extends Model
+{
+    protected $table = 'vehicule';
+    protected $primaryKey = 'id_vehicule';
+    public $timestamps = false;
+
+    protected $fillable = [
+        'id_modele',
+        'immatriculation',
+        'annee',
+        'couleur',
+        'kilometrage',
+        'numero_chassis',
+        'prix_achat',
+        'prix_vente',
+        'statut',
+        'date_acquisition',
+    ];
+
+    public function modele()
+    {
+        return $this->belongsTo(Modele::class, 'id_modele', 'id_modele');
+    }
+}

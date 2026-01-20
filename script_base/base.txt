@@ -11,18 +11,56 @@ CLIENT (
   email VARCHAR(100)
 )
 
--- 2. TABLE VEHICULE
-VEHICULE (
-  id_vehicule INT PRIMARY KEY AUTO_INCREMENT,
-  immatriculation VARCHAR(20) UNIQUE,
-  marque VARCHAR(50) NOT NULL,
-  modele VARCHAR(50) NOT NULL,
-  url_img VARCHAR(50) NOT NULL, 
-  annee INT NOT NULL CHECK (annee >= 1900 AND annee <= YEAR(CURRENT_DATE) + 1),
-  prix_achat DECIMAL(10,2) NOT NULL CHECK (prix_achat > 0),
-  prix_vente DECIMAL(10,2) NOT NULL CHECK (prix_vente > 0)
+-- ============================================
+-- TABLES DE RÉFÉRENCE VÉHICULES
+-- ============================================
+
+-- TABLE MARQUE (Nouveau)
+MARQUE (
+  id_marque INT PRIMARY KEY AUTO_INCREMENT,
+  libelle VARCHAR(50) NOT NULL UNIQUE,  -- Toyota, Honda, Mazda, Renault
+  pays_origine VARCHAR(50),              -- Japon, France, etc.
+  actif BOOLEAN DEFAULT TRUE
 )
 
+-- TABLE MODELE (Nouveau)
+MODELE (
+  id_modele INT PRIMARY KEY AUTO_INCREMENT,
+  id_marque INT NOT NULL,
+  libelle VARCHAR(50) NOT NULL,          -- Corolla, Civic, CX-5
+  type_vehicule VARCHAR(30),             -- Berline, SUV, Pick-up, etc.
+  url_img VARCHAR(100),                  -- Image générique du modèle
+  actif BOOLEAN DEFAULT TRUE,
+  
+  FOREIGN KEY (id_marque) REFERENCES MARQUE(id_marque),
+  UNIQUE (id_marque, libelle)            -- Un modèle unique par marque
+)
+
+-- TABLE VEHICULE (Modifiée - représente un exemplaire physique)
+VEHICULE (
+  id_vehicule INT PRIMARY KEY AUTO_INCREMENT,
+  id_modele INT NOT NULL,
+  immatriculation VARCHAR(20) UNIQUE,
+  annee INT NOT NULL CHECK (annee >= 1900 AND annee <= YEAR(CURRENT_DATE) + 1),
+  
+  -- Caractéristiques spécifiques à cet exemplaire
+  couleur VARCHAR(30),
+  kilometrage INT,
+  numero_chassis VARCHAR(50) UNIQUE,
+  
+  -- Prix spécifiques à cet exemplaire
+  prix_achat DECIMAL(10,2) NOT NULL CHECK (prix_achat > 0),
+  prix_vente DECIMAL(10,2) NOT NULL CHECK (prix_vente > 0),
+  
+  -- Statut du véhicule
+  statut VARCHAR(20) DEFAULT 'en_stock',  -- en_stock, vendu, en_réparation
+  date_acquisition DATE DEFAULT CURRENT_DATE,
+  
+  FOREIGN KEY (id_modele) REFERENCES MODELE(id_modele),
+  
+  CONSTRAINT chk_statut_vehicule 
+    CHECK (statut IN ('en_stock', 'vendu', 'en_reparation', 'reserve'))
+)
 -- 3. TABLE EMPLOYE
 EMPLOYE (
   id_employe INT PRIMARY KEY AUTO_INCREMENT,
