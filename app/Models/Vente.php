@@ -34,4 +34,19 @@ class Vente extends Model
     {
         return $this->belongsTo(StatutPaiement::class, 'id_statut_paiement', 'id_statut_paiement');
     }
+
+    public function paiements()
+    {
+        return $this->hasMany(Paiement::class, 'id_vente', 'id_vente');
+    }
+
+    public function getMontantPayeAttribute()
+    {
+        return $this->paiements()->sum('montant');
+    }
+
+    public function getResteAPayerAttribute()
+    {
+        return $this->montant_total - $this->montant_paye;
+    }
 }

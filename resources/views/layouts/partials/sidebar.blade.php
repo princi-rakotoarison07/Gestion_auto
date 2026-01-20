@@ -45,6 +45,24 @@
       </ul>
     </li>
 
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#paiements-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-cash-stack"></i><span>Paiements</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="paiements-nav" class="nav-content collapse {{ Request::is('paiements*') ? 'show' : '' }}" data-bs-parent="#sidebar-nav">
+        <li>
+          <a href="{{ url('/paiements') }}" class="{{ Request::is('paiements') ? 'active' : '' }}">
+            <i class="bi bi-circle"></i><span>Liste</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url('/paiements/create') }}" class="{{ Request::is('paiements/create') ? 'active' : '' }}">
+            <i class="bi bi-circle"></i><span>Nouveau</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+
 
 
   </ul>
