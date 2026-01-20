@@ -12,14 +12,16 @@ class Vehicule extends Model
 
     protected $fillable = [
         'id_modele',
+        'id_couleur',
+        'id_statut_vehicule',
+        'nombre_stock',
         'immatriculation',
         'annee',
-        'couleur',
         'kilometrage',
         'numero_chassis',
+        'img_vehicule',
         'prix_achat',
         'prix_vente',
-        'statut',
         'date_acquisition',
     ];
 

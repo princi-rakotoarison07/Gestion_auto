@@ -13,14 +13,32 @@
       <a class="nav-link collapsed" data-bs-target="#vehicules-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-car-front"></i><span>Véhicules</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
-      <ul id="vehicules-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+      <ul id="vehicules-nav" class="nav-content collapse {{ Request::is('vehicules*') ? 'show' : '' }}" data-bs-parent="#sidebar-nav">
         <li>
-          <a href="{{ url('/vehicules') }}">
+          <a href="{{ url('/vehicules') }}" class="{{ Request::is('vehicules') ? 'active' : '' }}">
             <i class="bi bi-circle"></i><span>Liste</span>
           </a>
         </li>
         <li>
-          <a href="{{ url('/vehicules/create') }}">
+          <a href="{{ url('/vehicules/create') }}" class="{{ Request::is('vehicules/create') ? 'active' : '' }}">
+            <i class="bi bi-circle"></i><span>Nouveau</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#ventes-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-cart-check"></i><span>Ventes</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="ventes-nav" class="nav-content collapse {{ Request::is('ventes*') ? 'show' : '' }}" data-bs-parent="#sidebar-nav">
+        <li>
+          <a href="{{ url('/ventes') }}" class="{{ Request::is('ventes') ? 'active' : '' }}">
+            <i class="bi bi-circle"></i><span>Liste</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url('/ventes/create') }}" class="{{ Request::is('ventes/create') ? 'active' : '' }}">
             <i class="bi bi-circle"></i><span>Nouveau</span>
           </a>
         </li>

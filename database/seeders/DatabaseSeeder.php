@@ -6,7 +6,10 @@ use App\Models\User;
 use Database\Seeders\MarqueSeeder;
 use Database\Seeders\ModeleSeeder;
 use Database\Seeders\ModePaiementSeeder;
+use Database\Seeders\CouleurSeeder;
+use Database\Seeders\RoleUtilisateurSeeder;
 use Database\Seeders\StatutPaiementSeeder;
+use Database\Seeders\StatutVehiculeSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -24,8 +27,12 @@ class DatabaseSeeder extends Seeder
         $this->call([
             MarqueSeeder::class,
             ModeleSeeder::class,
+            CouleurSeeder::class,
+            StatutVehiculeSeeder::class,
             StatutPaiementSeeder::class,
             ModePaiementSeeder::class,
+            RoleUtilisateurSeeder::class,
+            EmployeSeeder::class,
         ]);
 
         User::factory()->create([

@@ -28,29 +28,35 @@
           <table class="table table-striped align-middle">
             <thead>
               <tr>
-                <th>#</th>
+                <th>Image</th>
                 <th>Marque</th>
                 <th>Modèle</th>
                 <th>Immat.</th>
                 <th>Année</th>
                 <th>Couleur</th>
+                <th>Stock</th>
                 <th>Kilométrage</th>
                 <th>Prix vente</th>
-                <th>Statut</th>
               </tr>
             </thead>
             <tbody>
               @forelse ($vehicules as $vehicule)
                 <tr>
-                  <td>{{ $vehicule->id_vehicule }}</td>
+                  <td>
+                    @if ($vehicule->img_vehicule)
+                      <img src="{{ asset($vehicule->img_vehicule) }}" alt="Véhicule" style="width: 50px; height: 50px; object-fit: cover;" class="rounded">
+                    @else
+                      <span class="text-muted">No image</span>
+                    @endif
+                  </td>
                   <td>{{ $vehicule->modele?->marque?->libelle }}</td>
                   <td>{{ $vehicule->modele?->libelle }}</td>
                   <td>{{ $vehicule->immatriculation }}</td>
                   <td>{{ $vehicule->annee }}</td>
-                  <td>{{ $vehicule->couleur }}</td>
+                  <td>{{ $vehicule->couleur_libelle }}</td>
+                  <td>{{ $vehicule->nombre_stock }}</td>
                   <td>{{ $vehicule->kilometrage }}</td>
                   <td>{{ $vehicule->prix_vente }}</td>
-                  <td>{{ $vehicule->statut }}</td>
                 </tr>
               @empty
                 <tr>

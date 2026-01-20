@@ -48,6 +48,13 @@ CREATE TABLE couleur (
   date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 4b. TABLE ROLE_UTILISATEUR
+CREATE TABLE role_utilisateur (
+  id_role_utilisateur INT PRIMARY KEY AUTO_INCREMENT,
+  libelle VARCHAR(30) NOT NULL UNIQUE,   -- admin, vendeur, dg, ...
+  date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 5. TABLE STATUT_VEHICULE
 CREATE TABLE statut_vehicule (
   id_statut_vehicule INT PRIMARY KEY AUTO_INCREMENT,
@@ -94,13 +101,15 @@ CREATE TABLE vehicule (
   id_modele INT NOT NULL,
   id_couleur INT NOT NULL,
   id_statut_vehicule INT NOT NULL DEFAULT 1,
+  nombre_stock INT NOT NULL DEFAULT 0,
   
   -- Informations d'identification
   immatriculation VARCHAR(20) UNIQUE,
   numero_chassis VARCHAR(50) UNIQUE,
+  img_vehicule VARCHAR(255),
   
   -- Caractéristiques
-  annee_fabrication INT NOT NULL,
+  annee INT NOT NULL,
   kilometrage INT DEFAULT 0,
   transmission VARCHAR(20),               -- Manuelle, Automatique
   type_carburant VARCHAR(20),            -- Essence, Diesel
@@ -166,11 +175,12 @@ CREATE TABLE utilisateur (
   id_employe INT NOT NULL,
   login VARCHAR(50) UNIQUE NOT NULL,
   mot_de_passe VARCHAR(255) NOT NULL,
-  role VARCHAR(20) DEFAULT 'vendeur',    -- admin, vendeur
+  id_role_utilisateur INT NOT NULL DEFAULT 2,
   actif BOOLEAN DEFAULT TRUE,
   date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   
-  FOREIGN KEY (id_employe) REFERENCES employe(id_employe)
+  FOREIGN KEY (id_employe) REFERENCES employe(id_employe),
+  FOREIGN KEY (id_role_utilisateur) REFERENCES role_utilisateur(id_role_utilisateur)
 );
 
 -- 14. TABLE VENTE
@@ -261,6 +271,12 @@ INSERT INTO statut_vehicule (libelle) VALUES
 ('reserve'),
 ('vendu');
 
+-- Insertion des rôles utilisateur
+INSERT INTO role_utilisateur (libelle) VALUES
+('admin'),
+('vendeur'),
+('dg');
+
 -- Insertion des statuts de vente
 INSERT INTO statut_vente (libelle) VALUES
 ('en_attente'),
@@ -324,15 +340,15 @@ INSERT INTO caisse (libelle, solde_actuel) VALUES
 INSERT INTO employe (nom, prenom, telephone, email, poste) VALUES
 ('Admin', 'System', '0340000000', 'admin@automobile.mg', 'Administrateur');
 
-INSERT INTO utilisateur (id_employe, login, mot_de_passe, role) VALUES
-(1, 'admin', MD5('admin123'), 'admin');
+INSERT INTO utilisateur (id_employe, login, mot_de_passe, id_role_utilisateur) VALUES
+(1, 'admin', MD5('admin123'), 1);
 
 -- Insertion d'un vendeur exemple
 INSERT INTO employe (nom, prenom, telephone, email, poste) VALUES
 ('Dupont', 'Jean', '0341111111', 'jean@automobile.mg', 'Vendeur');
 
-INSERT INTO utilisateur (id_employe, login, mot_de_passe, role) VALUES
-(2, 'jean', MD5('vendeur123'), 'vendeur');
+INSERT INTO utilisateur (id_employe, login, mot_de_passe, id_role_utilisateur) VALUES
+(2, 'jean', MD5('vendeur123'), 2);
 
 -- ============================================
 -- REQUÊTES UTILES POUR L'APPLICATION
@@ -342,11 +358,12 @@ INSERT INTO utilisateur (id_employe, login, mot_de_passe, role) VALUES
 SELECT 
   u.id_utilisateur,
   u.login,
-  u.role,
+  ru.libelle as role,
   e.nom,
   e.prenom,
   e.poste
 FROM utilisateur u
+JOIN role_utilisateur ru ON u.id_role_utilisateur = ru.id_role_utilisateur
 JOIN employe e ON u.id_employe = e.id_employe
 WHERE u.login = 'admin' 
   AND u.mot_de_passe = MD5('admin123')
@@ -361,7 +378,7 @@ SELECT
   mo.libelle as modele,
   tv.libelle as type_vehicule,
   c.libelle as couleur,
-  v.annee_fabrication,
+  v.annee,
   v.kilometrage,
   v.prix_vente
 FROM vehicule v
@@ -369,7 +386,6 @@ JOIN modele mo ON v.id_modele = mo.id_modele
 JOIN marque ma ON mo.id_marque = ma.id_marque
 JOIN type_vehicule tv ON mo.id_type_vehicule = tv.id_type_vehicule
 JOIN couleur c ON v.id_couleur = c.id_couleur
-WHERE v.id_statut_vehicule = (SELECT id_statut_vehicule FROM statut_vehicule WHERE libelle = 'en_stock')
 ORDER BY v.date_creation;
 
 -- 3. Voir les ventes en cours
@@ -426,14 +442,13 @@ GROUP BY c.id_caisse;
 
 -- 6. Ajouter un nouveau véhicule (exemple)
 INSERT INTO vehicule (
-  id_modele, id_couleur, id_statut_vehicule, 
-  immatriculation, annee_fabrication, kilometrage,
+  id_modele, id_couleur, 
+  immatriculation, annee, kilometrage,
   transmission, type_carburant, prix_achat, prix_vente,
   date_acquisition, date_arrivee_stock
 ) VALUES (
   1,  -- id_modele (à définir)
   1,  -- id_couleur (Noir)
-  1,  -- id_statut_vehicule (en_stock)
   'ABC-123', 
   2023, 
   15000,

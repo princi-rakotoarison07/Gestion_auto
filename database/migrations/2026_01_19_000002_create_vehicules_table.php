@@ -18,6 +18,16 @@ return new class extends Migration
             $table->boolean('actif')->default(true);
         });
 
+        Schema::create('couleur', function (Blueprint $table) {
+            $table->increments('id_couleur');
+            $table->string('libelle', 30)->unique();
+        });
+
+        Schema::create('statut_vehicule', function (Blueprint $table) {
+            $table->increments('id_statut_vehicule');
+            $table->string('libelle', 30)->unique();
+        });
+
         Schema::create('modele', function (Blueprint $table) {
             $table->increments('id_modele');
 
@@ -35,20 +45,24 @@ return new class extends Migration
             $table->increments('id_vehicule');
 
             $table->unsignedInteger('id_modele');
+            $table->unsignedInteger('id_couleur');
+            $table->unsignedInteger('id_statut_vehicule')->default(1);
+            $table->integer('nombre_stock')->default(0);
             $table->string('immatriculation', 20)->unique()->nullable();
 
             $table->integer('annee');
-            $table->string('couleur', 30)->nullable();
             $table->integer('kilometrage')->nullable();
             $table->string('numero_chassis', 50)->nullable()->unique();
+            $table->string('img_vehicule', 255)->nullable();
 
             $table->decimal('prix_achat', 10, 2);
             $table->decimal('prix_vente', 10, 2);
 
-            $table->enum('statut', ['en_stock', 'vendu', 'en_reparation', 'reserve'])->default('en_stock');
             $table->date('date_acquisition')->useCurrent();
 
             $table->foreign('id_modele')->references('id_modele')->on('modele');
+            $table->foreign('id_couleur')->references('id_couleur')->on('couleur');
+            $table->foreign('id_statut_vehicule')->references('id_statut_vehicule')->on('statut_vehicule');
         });
     }
 
@@ -59,6 +73,8 @@ return new class extends Migration
     {
         Schema::dropIfExists('vehicule');
         Schema::dropIfExists('modele');
+        Schema::dropIfExists('statut_vehicule');
+        Schema::dropIfExists('couleur');
         Schema::dropIfExists('marque');
     }
 };
